@@ -1,0 +1,56 @@
+name: Update JurkStore Catalog
+
+on:
+  push:
+    paths:
+      - 'apps/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Scan apps and update catalog.txt
+        run: |
+          touch catalog.txt
+
+          # Scan every directory under apps/
+          for dir in apps/*/; do
+            [ -d "$dir" ] || continue
+            App=$(basename "$dir")
+            entry="\$repo/apps/$App/meta.xml"
+
+            # Check if this entry already exists in catalog.txt
+            if ! grep -Fxq "$entry" catalog.txt; then
+              echo "Adding new app: $entry"
+              echo "$entry" >> catalog.txt
+            else
+              echo "App already registered: $App"
+            fi
+
+            # Clear App variable for the next directory
+            unset App
+          done
+
+          # Remove duplicate entries so each path exists exactly once
+          awk '!seen[$0]++' catalog.txt > catalog.tmp && mv catalog.tmp catalog.txt
+          echo "Updated catalog.txt contents:"
+          cat catalog.txt
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain catalog.txt)" ]; then
+            git add catalog.txt
+            git commit -m "Auto-update catalog.txt with new apps [skip ci]"
+            git push
+          else
+            echo "catalog.txt is already up to date, no changes to commit."
+          fi
