@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jurkos-app>
+    <name>JurkFetch</name>
+    <version>1.0.0</version>
+    <author>AmineTheJurk_(JurkOS Owner)</author>
+    <description>Just NeoFetch but for JurkOS</description>
+    <download>https://raw.githubusercontent.com/AmineTheJurk/JurkStore-Apps/main/apps/JurkFetch/JurkFetch.bk</download>
+</jurkos-app>
